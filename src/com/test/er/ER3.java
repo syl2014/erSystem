@@ -191,7 +191,7 @@ public static class ERMap extends Mapper<Object,Text,Text,TextArrayWritable>{
 			fs.copyToLocalFile(true, path, new Path("/usr/local"));
 		}else{
 			System.out.println("文件不存在");
-		}
+		} 
 		fs.close();
 	}
 	
