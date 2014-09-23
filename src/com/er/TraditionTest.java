@@ -14,10 +14,10 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-
+//按照传统方法判断实体
 public class TraditionTest
 {
-
+	//判断是否是同一实体
 	public static boolean isSame(String valueOne, String valueTwo)
 	{
 		int count = 0; // 统计属性相同的个数
@@ -37,7 +37,7 @@ public class TraditionTest
 		}
 		return false;
 	}
-	
+	//两个相同的实体，得到输出的字符串
 	public static String getContent(String valueOne, String valueTwo)
 	{
 		String content = "";
@@ -47,14 +47,14 @@ public class TraditionTest
 		content = valueOne+"\t"+valueO+"=>"+valueT+"\n";
 		return content;
 	}
+	//将文件中的文本放到集合里
 	public static List<String> getFileList() throws IOException
 	{
 		List<String> list = new ArrayList<String>();
 		Configuration conf = new Configuration();
 		FileSystem fs = FileSystem.get(conf);
 		FSDataInputStream dataInput = fs.open(new Path("/user/longge/ER/data"));
-		InputStreamReader inputSteamReader = new InputStreamReader(dataInput,
-				"UTF-8");
+		InputStreamReader inputSteamReader = new InputStreamReader(dataInput,"UTF-8");
 		BufferedReader bufferedReader = new BufferedReader(inputSteamReader);
 		LineNumberReader lineNumberReader = new LineNumberReader(bufferedReader);
 		String s = "";
@@ -64,7 +64,7 @@ public class TraditionTest
 		}
 		return list;
 	}
-	
+	//集合中的实体两两比较
 	public static void compareList(List<String> list) throws IOException
 	{
 		Configuration configuration = new Configuration();  

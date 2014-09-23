@@ -52,7 +52,7 @@
 	<classpathentry kind="lib" path="E:/bigdata/hadoop/hadoop-1.1.2/hadoop-core-1.2.1.jar" sourcepath="E:/bigdata/hadoop/hadoop-1.1.2"/>
 	<classpathentry kind="lib" path="E:/bigdata/hadoop/hadoop-1.1.2/hadoop-client-1.1.2.jar"/>
 	<classpathentry kind="lib" path="E:/bigdata/hadoop/hadoop-1.1.2/hadoop-ant-1.1.2.jar"/>
-	<classpathentry kind="lib" path="E:/bigdata/hadoop/hbase-0.94.7-security/hbase-0.94.7-security.jar"/>
+	<classpathentry kind="lib" path="E:/bigdata/hadoop/hbase-0.94.7-security/hbase-0.94.7-security.jar" sourcepath="E:/bigdata/hadoop/hbase-0.94.7-security/src"/>
 	<classpathentry kind="lib" path="E:/bigdata/hadoop/hbase-0.94.7-security/lib/zookeeper-3.4.5.jar"/>
 	<classpathentry kind="lib" path="E:/bigdata/hadoop/hbase-0.94.7-security/lib/protobuf-java-2.4.0a.jar"/>
 	<classpathentry kind="lib" path="E:/bigdata/hadoop/hbase-0.94.7-security/lib/guava-11.0.2.jar"/>
