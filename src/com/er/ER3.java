@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -73,11 +74,11 @@ public static class ERMap extends Mapper<Object,Text,Text,TextArrayWritable>{
 		}
 	}
 }
-	public static class ERReduce extends Reducer<Text,TextArrayWritable,Text,NullWritable> {
+	public static class ERReduce extends Reducer<Text,TextArrayWritable,Text,Text> {
 		private NullWritable nullWritable = NullWritable.get();
-		private MultipleOutputs<Text,NullWritable> mos;
+		private MultipleOutputs<Text,Text> mos;
 		protected void setup(Context context){
-			 mos = new MultipleOutputs<Text,NullWritable>(context);
+			 mos = new MultipleOutputs<Text,Text>(context);
 		}
 		//判断两个实体是否需要比较
 		public boolean isMustCompare(String valueOne,String valueTwo){
@@ -113,7 +114,6 @@ public static class ERMap extends Mapper<Object,Text,Text,TextArrayWritable>{
 			}
 			//是同一个实体的依据：两个实体属性中有超过一般的属性是相同的
 			if(count>valueO.length/2){
-				System.out.println("count="+count);
 				return true;
 			}
 			return false;
@@ -141,6 +141,20 @@ public static class ERMap extends Mapper<Object,Text,Text,TextArrayWritable>{
 				return ;
 			map.put(entityTwo, entityOne);
 		}
+		//在map中通过value来得到key
+		public String getKeysByValue(String value,Map<String,String> map,Iterator<String> keys){
+			String entities = "";
+			while(keys.hasNext()){
+				String key = keys.next();
+				if(value.equals(map.get(key))){
+					entities+="=>"+key.subSequence(0,key.indexOf(":"));
+					keys.remove();
+					map.remove(key);
+				}
+			}
+			return entities;
+		}
+		
 		public void reduce(Text key,Iterable<TextArrayWritable> values,Context context) throws IOException, InterruptedException{
 			List<TextArrayWritable> list = new ArrayList<TextArrayWritable>();
 			//并查集
@@ -156,16 +170,17 @@ public static class ERMap extends Mapper<Object,Text,Text,TextArrayWritable>{
 				TextArrayWritable valueOne = list.get(i);
 				String entityOne =valueOne.toStrings()[0];
 				String entityOneAttrs = valueOne.toStrings()[1];
-				set.add(entityOne);
 				for(int j=i+1;j<list.size();j++){
 					TextArrayWritable valueTwo = list.get(j);
 					String entityTwo = valueTwo.toStrings()[0];
 					String entityTwoAttrs = valueTwo.toStrings()[1];
+					
 					if(isMustCompare(entityOneAttrs,entityTwoAttrs)){
 						if(!map.containsKey(entityOne))
-							map.put(entityOne, entityOne);
+							map.put(entityOne,entityOne);
 						if(!map.containsKey(entityTwo))
-							map.put(entityTwo, entityTwo);
+							map.put(entityTwo,entityTwo);
+						
 						if(!(find(entityOne,map).equals(find(entityTwo,map)))){
 							if(isSame(entityOne,entityTwo)){
 								setMerge(entityOne,entityTwo,map);
@@ -174,23 +189,46 @@ public static class ERMap extends Mapper<Object,Text,Text,TextArrayWritable>{
 					}
 				}
 			}
-			long count=0L;
-			String outputKey = "";
-			String outputSame = " ";
-			String tmp = "";
-			if(set.size()>=1){
-				Iterator<String> vals  = set.iterator();
-				outputKey = vals.next();
-				int index = outputKey.indexOf(":");
-				outputSame = outputKey.substring(0,index);
-				while(vals.hasNext()){
-					tmp = vals.next();
-					outputSame+="=>"+tmp.substring(0,tmp.indexOf(":"));
-				}
-				//mos.write("songyalong",new Text(outputKey+"\t"+outputSame),nullWritable);
-				
-				context.write(new Text(outputKey+"\t"+outputSame),null);
+			
+			String entities = "";
+			
+			Iterator<String> keys = map.keySet().iterator();
+			while(keys.hasNext()){
+			String k = keys.next();
+			String value = map.get(k);
+			keys.remove();
+			map.remove(k);
+			if(map.containsValue(value)){
+				entities = k.substring(0, k.indexOf(":"))+getKeysByValue(value,map,keys);
+				context.write(new Text(value), new Text(entities));
+			}else{
+				context.write(new Text(value),null);
 			}
+		}
+			
+			
+			
+			
+			
+			
+			
+//			long count=0L;
+//			String outputKey = "";
+//			String outputSame = " ";
+//			String tmp = "";
+//			if(set.size()>=1){
+//				Iterator<String> vals  = set.iterator();
+//				outputKey = vals.next();
+//				int index = outputKey.indexOf(":");
+//				outputSame = outputKey.substring(0,index);
+//				while(vals.hasNext()){
+//					tmp = vals.next();
+//					outputSame+="=>"+tmp.substring(0,tmp.indexOf(":"));
+//				}
+//				//mos.write("songyalong",new Text(outputKey+"\t"+outputSame),nullWritable);
+//				
+//				//context.write(new Text(outputKey+"\t"+outputSame),null);
+//			}
 		}
 		
 		public void cleanup(Context context) throws IOException, InterruptedException{
@@ -214,8 +252,5 @@ public static class ERMap extends Mapper<Object,Text,Text,TextArrayWritable>{
 		FileOutputFormat.setOutputPath(job, new Path("hdfs://192.168.38.100:9000/user/longge/outER"));
 		
 		System.exit(job.waitForCompletion(true)?0:1);
-
 	}
-	
-	
 }
