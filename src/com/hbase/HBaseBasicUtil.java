@@ -56,7 +56,7 @@ public class HBaseBasicUtil
 		//data be inserted tablename1
 		HTable tableOne = new HTable(hbaseConfig, tablename1);
 		HTable tableTwo = new HTable(hbaseConfig,tablename2);
-		Put put = new Put(Bytes.toBytes(count));
+		Put put = new Put(Bytes.toBytes(count)); //count 行健
 		
 		put.add("entity".getBytes(),"value".getBytes(), value.getBytes());
 		tableOne.put(put);

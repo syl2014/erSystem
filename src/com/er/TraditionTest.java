@@ -24,14 +24,15 @@ public class TraditionTest
 		int index = valueOne.indexOf(":");
 		String[] valueO = valueOne.substring(index + 1).split(":");
 		String[] valueT = valueTwo.substring(index + 1).split(":");
-		for (int i = 0; i < valueO.length; i++)
+		int len = valueO.length>valueT.length?valueT.length:valueO.length;
+		for (int i = 0; i <len; i++)
 		{
 			if (valueO[i].equals(valueT[i]))
 			{
 				count++;
 			}
 		}
-		if (count > index / 2)
+		if (count > len / 2)
 		{
 			return true;
 		}
@@ -60,8 +61,11 @@ public class TraditionTest
 		String s = "";
 		while((s=lineNumberReader.readLine())!=null)
 		{
+			bufferedReader.mark(10000);
 			list.add(s);
 		}
+		lineNumberReader.close();
+		bufferedReader.close();
 		return list;
 	}
 	//集合中的实体两两比较
@@ -87,9 +91,53 @@ public class TraditionTest
 		out.flush();
 		out.close();
 	}
+	
+	//第二种比较方式 
+	public static void compare() throws IOException
+	{
+		Configuration conf = new Configuration();
+		FileSystem fs = FileSystem.get(conf);
+		FSDataInputStream dataInput = fs.open(new Path("/user/longge/ER/5.txt"));
+		InputStreamReader inputSteamReader = new InputStreamReader(dataInput,"UTF-8");
+		BufferedReader bufferedReader = new BufferedReader(inputSteamReader);
+		FSDataOutputStream  out = fs.create(new Path("/user/longge/ER/content"));
+		String content = "";
+		String nextContent = "";
+		int len = 12689408;
+		while((content=bufferedReader.readLine())!=null)
+		{
+			len = len-content.getBytes().length;
+			bufferedReader.mark(len);
+			while((nextContent=bufferedReader.readLine())!=null)
+			{
+				if(isSame(content,nextContent))
+				{
+					String writeContent = getContent(content,nextContent);
+					System.out.println("writeContent="+writeContent);
+					out.write(writeContent.getBytes());
+				}
+			}
+			
+			bufferedReader.reset();
+		}
+		
+		out.flush();
+		out.close();
+		bufferedReader.close();
+		dataInput.close();
+		fs.close();
+	}
+	
+	
 	public static void main(String[] args) throws IOException
 	{
-		List<String> list = getFileList();
-		compareList(list);
+		long start = System.currentTimeMillis();
+		
+//		List<String> list = getFileList();
+//		compareList(list);
+		
+		compare();
+		long end = System.currentTimeMillis();
+		System.out.println("程序运行时间："+(end-start)+"ms");
 	}
 }
